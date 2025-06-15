@@ -1,0 +1,45 @@
+@name DrawIMG
+@inputs 
+@outputs PixelX PixelY PixelG FillColor
+@persist Data:string Width Height URL:string
+@strict
+
+runOnTick(1)
+
+if(first()){
+    runOnHTTP(1)
+    Data = ""
+    FillColor = 0
+    PixelX = 0
+    PixelY = 0
+    URL = ""
+}
+
+if(httpCanRequest()){
+    if(Data:length() == 0){
+        httpRequest(URL)   
+    }
+}
+if(httpClk()){
+    if(Data:length() == 0){
+        Data = httpData()
+        Width = toByte(Data, 1)+1
+        if(toByte(Data, 2) > 0){
+            Width += toByte(Data, 2)+1
+        }
+        Height = toByte(Data, 3)+1
+        if(toByte(Data, 4) > 0){
+            Height += toByte(Data, 4)+1
+        }
+    }
+}
+if(Data:length() > 0){
+    if(PixelY<Height){
+        FillColor = 1
+        PixelY++
+        PixelG = toByte(Data, 5+PixelY+(PixelX*Height))
+    }elseif(PixelX<Width){
+        PixelY = 0
+        PixelX++
+    }
+}
